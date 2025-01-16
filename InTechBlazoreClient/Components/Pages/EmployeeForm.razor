@@ -1,0 +1,70 @@
+﻿@page "/employee/edit"
+@page "/employee/edit/{id:int?}"
+
+@inject EmployeeService EmployeeService
+@inject NavigationManager NavigationManager
+@using InTechBlazoreClient.Components.Services
+@using InTechBlazoreClient.Components.Models
+@using System.ComponentModel.DataAnnotations
+
+<h3>@(employee.ID == 0 ? "Add Employee" : "Edit Employee")</h3>
+
+<EditForm Model="@employee" OnValidSubmit="HandleValidSubmit" style="width: 50%">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="@employee.Name" maxlength="75" />
+    </div>
+
+    <div class="form-group">
+        <label for="department">Department</label>
+        <InputSelect id="department" class="form-control" @bind-Value="@employee.DepartmentID">
+            <option value="">-- Select Department --</option>
+            @foreach (var dept in departments)
+            {
+                <option value="@dept.ID">@dept.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+ 
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private EmployeeModel employee = new EmployeeModel();
+    private List<DepartmentModel> departments = new List<DepartmentModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch departments (this would normally come from another API endpoint)
+        departments = new List<DepartmentModel>
+        {
+            new DepartmentModel { ID = 1, Name = "HR" },
+            new DepartmentModel { ID = 2, Name = "Engineering" },
+            new DepartmentModel { ID = 3, Name = "Finance" }
+        };
+
+        if (Id.HasValue)
+        {
+            employee = await EmployeeService.GetEmployeeAsync(Id.Value);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (employee.ID == 0)
+        {
+            await EmployeeService.CreateEmployeeAsync(employee);
+        }
+        else
+        {
+            await EmployeeService.UpdateEmployeeAsync(employee);
+        }
+
+        NavigationManager.NavigateTo("/employee");
+    }
+}

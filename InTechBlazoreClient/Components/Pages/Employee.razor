@@ -1,0 +1,68 @@
+﻿@page "/employee"
+@attribute [StreamRendering]
+@inject  EmployeeService EmployeeService
+@inject NavigationManager NavigationManager
+@using InTechBlazoreClient.Components.Services
+@using InTechBlazoreClient.Components.Models
+<h1>Employee List</h1>
+
+<PageTitle>Employee</PageTitle>
+<button class="btn btn-primary" @onclick="CreateNewEmployee">Add New Employee</button> 
+
+@if (employees == null)
+{
+    <p><em><b>Loading...</b></em></p>
+}
+else if(employees.Count == 0)
+{
+    <p><em><b>No employees found. Please create one.</b></em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Name</td>
+                    <td>@employee.DepartmentName</td>
+                    <td>
+                        <button class="btn btn-warning" @onclick="() => EditEmployee(employee.ID)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.ID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EmployeeModel>? employees ;
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await EmployeeService.GetEmployeesAsync();
+    }
+
+    private void CreateNewEmployee()
+    {
+       NavigationManager.NavigateTo("/employee/edit");
+    }
+
+    private void EditEmployee(int id)
+    {
+       NavigationManager.NavigateTo($"/employee/edit/{id}");
+    }
+
+    private async Task DeleteEmployee(int id)
+    {
+        await EmployeeService.DeleteEmployeeAsync(id);
+        employees = await EmployeeService.GetEmployeesAsync(); // Refresh the list
+    }
+}

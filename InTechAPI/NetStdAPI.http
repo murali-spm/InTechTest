@@ -1,0 +1,6 @@
+@NetStdAPI_HostAddress = http://localhost:5189
+
+GET {{NetStdAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
